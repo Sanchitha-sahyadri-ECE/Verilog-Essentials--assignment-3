@@ -1,0 +1,67 @@
+Design code
+module updown_counter (
+    input wire clk,
+    input wire rst,
+    input wire up_down,
+    output reg [3:0] count
+);
+
+always @(posedge clk) begin
+    if (rst)
+        count <= 4'b0000;
+    else if (up_down)
+        count <= count + 1;
+    else
+        count <= count - 1;
+end
+
+endmodule
+
+Testbench code 
+module tb_updown_counter;
+
+    reg clk;
+    reg rst;
+    reg up_down;
+    wire [3:0] count;
+
+    updown_counter uut (
+        .clk(clk),
+        .rst(rst),
+        .up_down(up_down),
+        .count(count)
+    );
+
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;
+    end
+
+    initial begin
+        rst = 1;
+        up_down = 1;  // count up
+        #15;
+        rst = 0;
+
+        #40;
+        up_down = 0;  // count down
+
+        #40;
+        rst = 1;      // reset again
+        #10;
+        rst = 0;
+
+        #30;
+        $finish;
+    end
+
+    initial begin
+        $dumpfile("updown_counter.vcd");
+        $dumpvars(0, tb_updown_counter);
+    end
+
+    initial begin
+        $monitor("Time=%0t | clk=%b | rst=%b | up_down=%b | count=%b", $time, clk, rst, up_down, count);
+    end
+
+endmodule
